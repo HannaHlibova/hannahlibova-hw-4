@@ -153,7 +153,7 @@ const users = [
     const fragment = document.createDocumentFragment();
     fragment.appendChild(table);
     createTableHead();
-    createTableBody(usersInfoArr);
+    createTableBody();
     createTableFoot();
     tableHolder.appendChild(fragment);
   }
@@ -173,7 +173,12 @@ const users = [
     table.appendChild(tableHead);
   }
 
-  function createTableBody(arr) {
+  function createTableBody() {
+    table.appendChild(tableBody);
+    createTableContent(usersInfoArr);
+  }
+  
+  function createTableContent(arr) {
     arr.forEach(item => {
       const userInfoArr = Object.values(item);
       const tr = document.createElement('tr');
@@ -186,8 +191,12 @@ const users = [
         tr.appendChild(td);
       });
     });
-
-    table.appendChild(tableBody);
+  }
+  
+  function removeTableContent() {
+    while (tableBody.firstChild) {
+      tableBody.firstChild.remove();
+  }
   }
   
   function createTableFoot() {
@@ -246,21 +255,19 @@ const users = [
     sortBtn.classList.toggle('min-to-max');
     
     if(sortBtn.classList.contains('min-to-max')) {
+      btnArrow.classList.remove('glyphicon-arrow-up');
+      btnArrow.classList.add('glyphicon-arrow-down');
       sortedusersArr = usersInfoArr.sort((item1, item2) => (item1.balance - item2.balance));
     } else {
+      btnArrow.classList.add('glyphicon-arrow-up');
+      btnArrow.classList.remove('glyphicon-arrow-down');
       sortedusersArr = usersInfoArr.sort((item1, item2) => (item2.balance - item1.balance));
     }
     
-    // console.log(sortedusersArr)
-    // return sortedusersArr;
-    
-    createTableBody(sortedusersArr);
+    removeTableContent();
+    createTableContent(sortedusersArr);
   }
 
 })(users);
-
-
-
-
 
 });
