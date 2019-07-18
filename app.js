@@ -11,11 +11,7 @@ document.addEventListener('DOMContentLoaded', function(){
 // Функция принимает только DOM объекты.
 
 function isParent(parent, child) {
-    if(parent.contains(child)) {
-        return true;
-    } else {
-        return false;
-    }
+    return parent.contains(child);
 }
 
 isParent(document.body.children[0], document.querySelector('mark'));
@@ -118,113 +114,132 @@ const users = [
     "nestedField": { total: 200 }
   }
 ];
+const tableHeadInfo = {
+  id: '#',
+  name: 'Name',
+  email: 'Email',
+  balance: 'Balance'
+}
+const tableHeadInfoArr = Object.values(tableHeadInfo);
+const usersInfoArr = users.map(function(item) {
+  return {
+    id: item._id,
+    name: item.name,
+    email: item.email,
+    balance: item.balance
+  }
+});
+const [{balance}] = usersInfoArr;
+// UI elements
+const tableHolder = document.querySelector('.table-holder');
+const table = document.createElement('table');
+const tableHead = document.createElement('thead');
+const tableBody = document.createElement('tbody');
+const tableFoot = document.createElement('tfoot');
+const sortBtn = document.createElement('a');
+const btnText = document.createElement('span');
+const btnArrow = document.createElement('span');
+let totalValue;
 
+const createTable = () => {
+  const fragment = document.createDocumentFragment();
+  fragment.appendChild(table);
+  createTableHead();
+  createTableBody();
+  createTableFoot();
+  tableHolder.appendChild(fragment);
+}
+
+const createTableHead = () => {
+  const tr = document.createElement('tr');
+
+  tableHead.appendChild(tr);
+
+  tableHeadInfoArr.forEach(cell => {
+    const th = document.createElement('th');
+    th.textContent = `${cell}`;
+    tr.appendChild(th);
+  });
+
+  table.appendChild(tableHead);
+}
+
+const createTableBody = () => {
+  table.appendChild(tableBody);
+  createTableContent(usersInfoArr);
+}
+
+const createTableContent = (arr) => {
+  arr.forEach(item => {
+    const userInfoArr = Object.values(item);
+    const tr = document.createElement('tr');
+    
+    tableBody.appendChild(tr);
+
+    userInfoArr.forEach(nestedItem => {
+      const td = document.createElement('td');
+      td.textContent = `${nestedItem}`;
+      tr.appendChild(td);
+    });
+  });
+}
+
+const removeTableContent = () => {
+  while (tableBody.firstChild) {
+      tableBody.firstChild.remove();
+  }
+}
+
+const createTableFoot = () => {
+  const tr = document.createElement('tr');
+  const span = document.createElement('span');
+  const strong = document.createElement('strong');
+  const td = document.createElement('td');
+  totalValue = strong.textContent = calcTotal();
+  
+  tableFoot.appendChild(tr);
+  
+  td.setAttribute('colspan', '4');
+  td.style.textAlign = 'right';
+  span.textContent = 'Total balance: ';
+  td.appendChild(span);
+  strong.textContent = calcTotal();
+  td.appendChild(strong);
+  
+  tr.appendChild(td);
+  table.appendChild(tableFoot);
+}
+
+const calcTotal = () => {
+  totalValue = users.reduce((acc, item) => acc += item.balance, 1);
+  
+  return totalValue;
+}
+
+const sortBalance = () => {
+  sortBtn.classList.toggle('min-to-max');
+  
+  if(sortBtn.classList.contains('min-to-max')) {
+    btnArrow.classList.remove('glyphicon-arrow-up');
+    btnArrow.classList.add('glyphicon-arrow-down');
+    sortedusersArr = usersInfoArr.sort((item1, item2) => (item1.balance - item2.balance));
+  } else {
+    btnArrow.classList.add('glyphicon-arrow-up');
+    btnArrow.classList.remove('glyphicon-arrow-down');
+    sortedusersArr = usersInfoArr.sort((item1, item2) => (item2.balance - item1.balance));
+  }
+  
+  removeTableContent();
+  createTableContent(sortedusersArr);
+}
+
+// function for creating table
 (function(arrOfUsers) {
-  // UI elements
-  const tableHolder = document.querySelector('.table-holder');
-  const table = document.createElement('table');
-  const tableHead = document.createElement('thead');
-  const tableBody = document.createElement('tbody');
-  const tableFoot = document.createElement('tfoot');
-
   //UI set styles
   table.classList.add('table');
   
-  const tableHeadInfo = {
-    id: '#',
-    name: 'Name',
-    email: 'Email',
-    balance: 'Balance'
-  }
-  const tableHeadInfoArr = Object.values(tableHeadInfo);
-  const usersInfoArr = users.map(function(item) {
-    return {
-      id: item._id,
-      name: item.name,
-      email: item.email,
-      balance: item.balance
-    }
-  });
-  const [{balance}] = usersInfoArr;
-
   createTable();
 
-  function createTable() {
-    const fragment = document.createDocumentFragment();
-    fragment.appendChild(table);
-    createTableHead();
-    createTableBody();
-    createTableFoot();
-    tableHolder.appendChild(fragment);
-  }
-
-  function createTableHead() {
-    
-    const tr = document.createElement('tr');
-
-    tableHead.appendChild(tr);
-
-    tableHeadInfoArr.forEach(cell => {
-      const th = document.createElement('th');
-      th.textContent = `${cell}`;
-      tr.appendChild(th);
-    });
-
-    table.appendChild(tableHead);
-  }
-
-  function createTableBody() {
-    table.appendChild(tableBody);
-    createTableContent(usersInfoArr);
-  }
-  
-  function createTableContent(arr) {
-    arr.forEach(item => {
-      const userInfoArr = Object.values(item);
-      const tr = document.createElement('tr');
-      
-      tableBody.appendChild(tr);
-
-      userInfoArr.forEach(nestedItem => {
-        const td = document.createElement('td');
-        td.textContent = `${nestedItem}`;
-        tr.appendChild(td);
-      });
-    });
-  }
-  
-  function removeTableContent() {
-    while (tableBody.firstChild) {
-      tableBody.firstChild.remove();
-  }
-  }
-  
-  function createTableFoot() {
-    const tr = document.createElement('tr');
-    const span = document.createElement('span');
-    const strong = document.createElement('strong');
-    const td = document.createElement('td');
-    let totalValue = strong.textContent = calcTotal();
-    
-    tableFoot.appendChild(tr);
-    
-    td.setAttribute('colspan', '4');
-    td.style.textAlign = 'right';
-    span.textContent = 'Total balance: ';
-    td.appendChild(span);
-    strong.textContent = calcTotal();
-    td.appendChild(strong);
-    
-    tr.appendChild(td);
-    table.appendChild(tableFoot);
-  }
-  
-  function calcTotal() {
-    let totalValue = users.reduce((acc, item) => acc += item.balance, 1);
-    
-    return totalValue;
-  }
-  
   // 7. 
   // Из презентации “Занятие 7 - Манипуляция DOM. 
   // Работа с атрибутами.” дополнить функционал для таблицы из задачи 6. 
@@ -232,9 +247,6 @@ const users = [
   // при этом в кнопке должна показываться стрелка в какую сторону сейчас отсортированы пользователи. 
   // Иконки можете взять с font awesome, в качестве фреймворка использовался bootstrap.
 
-  let sortBtn = document.createElement('a');
-  let btnText = document.createElement('span');
-  let btnArrow = document.createElement('span');
   
   sortBtn.classList.add('btn', 'btn-primary');
   
@@ -245,28 +257,10 @@ const users = [
   sortBtn.appendChild(btnArrow);
   
   tableHolder.insertAdjacentElement('afterbegin', sortBtn);
-  
 
   let sortedusersArr = [];
   
   sortBtn.addEventListener('click', sortBalance);
-  
-  function sortBalance() {
-    sortBtn.classList.toggle('min-to-max');
-    
-    if(sortBtn.classList.contains('min-to-max')) {
-      btnArrow.classList.remove('glyphicon-arrow-up');
-      btnArrow.classList.add('glyphicon-arrow-down');
-      sortedusersArr = usersInfoArr.sort((item1, item2) => (item1.balance - item2.balance));
-    } else {
-      btnArrow.classList.add('glyphicon-arrow-up');
-      btnArrow.classList.remove('glyphicon-arrow-down');
-      sortedusersArr = usersInfoArr.sort((item1, item2) => (item2.balance - item1.balance));
-    }
-    
-    removeTableContent();
-    createTableContent(sortedusersArr);
-  }
 
 })(users);
 
